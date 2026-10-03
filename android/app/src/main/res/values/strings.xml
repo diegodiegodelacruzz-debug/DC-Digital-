@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DCDigital</string>
+    <string name="title_activity_main">DCDigital</string>
+    <string name="package_name">com.dcdigital.app</string>
+    <string name="custom_url_scheme">com.dcdigital.app</string>
+</resources>
