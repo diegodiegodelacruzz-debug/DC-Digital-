@@ -3,6 +3,7 @@ import { initLogo3D } from './logo3d'
 
 const whatsapp = 'https://wa.me/5491173647291'
 const instagram = 'https://www.instagram.com/ddelacruzdigital'
+const email = 'ddelacruzdigital@gmail.com'
 
 const projects = [
   ['Motomecánica','Motos y mecánica','https://motomecanica.netlify.app/','motomecanica.png'],
@@ -195,6 +196,44 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         </div>
       </section>
 
+
+      <section class="reviews-section section" id="resenas">
+        <div class="section-heading reveal">
+          <span class="eyebrow"><i></i> LA EXPERIENCIA DE NUESTROS CLIENTES</span>
+          <h2>EXPERIENCIAS <span>REALES.</span></h2>
+          <p>Cada proyecto es una historia. Queremos conocer cómo fue tu experiencia trabajando con DC Digital.</p>
+        </div>
+        <div class="reviews-content reveal">
+          <div class="reviews-info">
+            <span class="reviews-symbol">★★★★★</span>
+            <h3>TU OPINIÓN<br>HACE LA DIFERENCIA.</h3>
+            <p>Si ya trabajamos juntos, contanos qué te pareció el resultado y ayudá a otros negocios a dar el siguiente paso.</p>
+            <small>Las opiniones son revisadas antes de su publicación.</small>
+          </div>
+          <form class="review-form" id="reviewForm" name="resenas">
+            <input type="hidden" name="form-name" value="resenas">
+            <div class="review-honeypot">
+              <label>No completar <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+            </div>
+            <label for="reviewName">TU NOMBRE</label>
+            <input id="reviewName" name="nombre" type="text" placeholder="Nombre o nombre de tu negocio" maxlength="80" required>
+            <label for="reviewRating">CALIFICACIÓN</label>
+            <select id="reviewRating" name="puntuacion" required>
+              <option value="">Seleccioná tu puntuación</option>
+              <option value="5 estrellas">★★★★★ — Excelente</option>
+              <option value="4 estrellas">★★★★ — Muy bueno</option>
+              <option value="3 estrellas">★★★ — Bueno</option>
+              <option value="2 estrellas">★★ — Regular</option>
+              <option value="1 estrella">★ — A mejorar</option>
+            </select>
+            <label for="reviewComment">TU EXPERIENCIA</label>
+            <textarea id="reviewComment" name="comentario" rows="5" maxlength="1000" placeholder="Contanos cómo fue trabajar con nosotros..." required></textarea>
+            <button class="button-primary review-submit" type="submit">ENVIAR MI OPINIÓN ↗</button>
+            <p class="review-feedback" id="reviewFeedback" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
       <section class="final-cta section" id="contacto">
         <div class="cta-glow"></div>
         <div class="reveal">
@@ -203,13 +242,14 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <p>Contanos tu idea. Puede ser una página web, una aplicación móvil o el comienzo de una nueva presencia digital para tu negocio.</p>
           <a class="button-primary large-button" href="${whatsapp}" target="_blank">HABLAR POR WHATSAPP ↗</a>
           <a class="instagram-link" href="${instagram}" target="_blank">TAMBIÉN EN INSTAGRAM · @DDELACRUZDIGITAL ↗</a>
+          <a class="email-contact" href="mailto:${email}">ESCRIBINOS · ${email} ↗</a>
         </div>
       </section>
     </main>
 
     <footer class="footer">
       <a href="#inicio" class="footer-brand">DC<span>DIGITAL</span><small>CREAMOS TU PRÓXIMA DIMENSIÓN</small></a>
-      <div class="footer-links"><a href="#servicios">Servicios</a><a href="#proyectos">Proyectos</a><a href="${instagram}" target="_blank">Instagram</a><a href="${whatsapp}" target="_blank">WhatsApp</a></div>
+      <div class="footer-links"><a href="#servicios">Servicios</a><a href="#proyectos">Proyectos</a><a href="${instagram}" target="_blank">Instagram</a><a href="${whatsapp}" target="_blank">WhatsApp</a><a href="mailto:${email}">Email</a><a href="#resenas">Reseñas</a></div>
       <div class="footer-bottom"><span>© ${new Date().getFullYear()} DC DIGITAL. TODOS LOS DERECHOS RESERVADOS.</span><a href="#inicio">VOLVER ARRIBA ↑</a></div>
     </footer>
   </div>
@@ -220,6 +260,47 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 void initLogo3D('#dcLogo3D').catch(error => {
   console.error('No se pudo iniciar el logo 3D:', error)
 })
+
+
+document.querySelector<HTMLFormElement>('#reviewForm')?.addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const form = event.currentTarget as HTMLFormElement;
+  const feedback = document.querySelector<HTMLElement>('#reviewFeedback');
+  const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+  if (!feedback || !button) return;
+  if ((form.elements.namedItem('bot-field') as HTMLInputElement)?.value) return;
+
+  button.disabled = true;
+  button.textContent = 'ENVIANDO...';
+  feedback.textContent = '';
+
+  try {
+    const data = new URLSearchParams();
+    new FormData(form).forEach((value, key) => {
+      data.append(key, String(value));
+    });
+
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: data.toString()
+    });
+
+    if (!response.ok) throw new Error('No se pudo enviar');
+
+    form.reset();
+    feedback.textContent = '¡Gracias por compartir tu experiencia! Tu opinión quedó enviada para revisión.';
+    feedback.classList.add('review-success');
+  } catch (error) {
+    feedback.textContent = 'No pudimos enviar tu opinión. Intentá nuevamente o escribinos por WhatsApp.';
+    feedback.classList.remove('review-success');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'ENVIAR MI OPINIÓN ↗';
+  }
+});
 
 const intro = document.querySelector<HTMLElement>('#intro')
 const finishIntro = () => {
